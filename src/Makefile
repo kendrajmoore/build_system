@@ -32,12 +32,13 @@
 #‘include’ folder : contains the three directories of supporting header files
 #common - Contains common headers for both platform targets, msp432 - Contains MSP432 platform headers,CMSIS - Contains ARM architecture specific headers
 
-include sources.mk
+#include sources.mk
 
 # Platform Overrides
 PLATFORM ?= HOST
 
 TARGET = c1m2
+
 
 # Architectures Specific Flags
 CPU = cortex-m0plus
@@ -57,7 +58,7 @@ ifeq ($(PLATFORM), MSP432)
     ARCH_FLAGS =  -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nosys.specs
     CFLAGS += $(ARCH_FLAGS) $(CPPFLAGS)
     LDFLAGS = -Wl,-Map=$(TARGET).map $(LINKER_FILE)
-    SOURCES = src/main.c src/memory.c src/startup_msp432p401r_gcc.c src/interrupts_msp432p401r_gcc.c src/system_msp432p401r.c
+    SOURCES = main.c smemory.c startup_msp432p401r_gcc.c interrupts_msp432p401r_gcc.c system_msp432p401r.c
     INCLUDES = -I./include/common -Imsp432
     SIZE_TOOL = arm-none-eabi-size
 else
@@ -66,10 +67,15 @@ else
     CPPFLAGS = -DHOST
     LDFLAGS = -Wl,-Map=c1m2.map,--cref
     CFLAGS += $(CPPFLAGS)
-    SOURCES = src/main.c src/memory.c
+    SOURCES = main.c memory.c
     INCLUDES = -I./include/common -I./include/CMSIS
     SIZE_TOOL = size
 endif
+
+
+
+
+
 
 # Object files
 OBJECTS = $(SOURCES:.c=.o)
@@ -79,7 +85,9 @@ DEPS = $(SOURCES:.c=.d)
 
 
 # Rule to build the final executable
-.PHONY: all
+.PHONY: all build compile-all clean
+
+
 all: build
 
 $(TARGET).out: $(OBJS)
@@ -116,6 +124,8 @@ build: $(OBJECTS)
 .PHONY: clean
 clean:
 	rm -f $(OBJS) $(TARGET).out $(TARGET).map
+
+
 
 
 
