@@ -58,7 +58,7 @@ ifeq ($(PLATFORM), MSP432)
     ARCH_FLAGS =  -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nosys.specs
     CFLAGS += $(ARCH_FLAGS) $(CPPFLAGS)
     LDFLAGS = -Wl,-Map=$(TARGET).map $(LINKER_FILE)
-    SOURCES = main.c smemory.c startup_msp432p401r_gcc.c interrupts_msp432p401r_gcc.c system_msp432p401r.c
+    SOURCES = main.c memory.c startup_msp432p401r_gcc.c interrupts_msp432p401r_gcc.c system_msp432p401r.c
     INCLUDES = -I./include/common -Imsp432
     SIZE_TOOL = arm-none-eabi-size
 else
@@ -71,11 +71,6 @@ else
     INCLUDES = -I./include/common -I./include/CMSIS
     SIZE_TOOL = size
 endif
-
-
-
-
-
 
 # Object files
 OBJECTS = $(SOURCES:.c=.o)
@@ -90,8 +85,8 @@ DEPS = $(SOURCES:.c=.d)
 
 all: build
 
-$(TARGET).out: $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) $(LDFLAGS) -o $@
+$(TARGET).out: $(OBJECTS)
+	$(CC) $(OBJECTS) $(CFLAGS) $(LDFLAGS) -o $@
 	$(CC)-size $@
 
 
@@ -112,7 +107,6 @@ build: $(OBJECTS)
 # Generate assembly output of c-program implementation files and the final output executable (Use the –S flag and the objdump utility).
 %.asm: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -S $< -o $@
-	objdump -d $(@:.asm=.o) > $(@:.asm=.o).asm
 
 
 # Compile object files, for all c-source files (but do not link) by specifying the object file you want to compile.
@@ -121,9 +115,9 @@ build: $(OBJECTS)
 
 # Clean build files, This should remove all compiled objects, preprocessed outputs, assembly outputs, executable files and build output files.
 # Needs to have .PHONY protection, This includes but is not limited to .map, .out, .o, .asm, .i etc.
-.PHONY: clean
+
 clean:
-	rm -f $(OBJS) $(TARGET).out $(TARGET).map
+	rm -f $(OBJECTS) $(OBJECTS:.o=.d) $(OBJECTS:.o=.asm) $(TARGET).out $(TARGET).map
 
 
 
